@@ -1,4 +1,16 @@
 var utilisateurDAO = require('../donnee/UtilisateurDAO');
+var fs = require('fs');
+
+var data;
+fs.readFile('api/ressource/ressource-mots.txt', 'utf8', function (err,rawData) {
+    console.log("je commence à lire mon fichier");
+    if (err) {
+        return console.log(err);
+    }
+    data = rawData.split('\n');
+    console.log("jai mes data")
+});
+
 
 exports.seConnecter = async function (requete, reponse) {
     try {
@@ -36,6 +48,30 @@ exports.postUtilisateur = async function (requete, reponse) {
         const { rows : utilisateur } = await utilisateurDAO.insererUtilisateur(pseudo, passe, mail, telephone, couleur, nbVictoire, dateNaissance);
 
         return reponse.status(200).send({ 'message': 'Insertion réussie'});
+    } catch(error) {
+        console.log(error);
+        return reponse.status(400).send(error);
+    }
+}
+
+exports.retournerMotAleatoire = function (requete, reponse) {
+
+    try {
+
+
+        function randomInt (low, high) {
+            console.log("je random un nombre");
+            return Math.floor(Math.random() * (high - low) + low);
+        }
+
+        function getRandomLine(){
+            console.log("je recupere ma ligne");
+            /** On recupérer le mot et on enléve les tab et les espaces */
+            return data[randomInt(0,data.length)].toString().replace(/[\t/\s]/g, '').split('\r\n');
+        }
+
+
+        return reponse.status(200).send({ mot: getRandomLine()});
     } catch(error) {
         console.log(error);
         return reponse.status(400).send(error);
